@@ -1,6 +1,6 @@
 <template>
   <router-link :to="link" class="router-link">
-    <q-item clickable tag="a" target="_blank">
+    <q-item clickable tag="a" target="_blank" @click="selectApp">
       <q-item-section v-if="icon" avatar>
         <q-icon :name="icon" />
       </q-item-section>
@@ -18,6 +18,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "EssentialLink",
+  emits: ["on-selected-app"],
   props: {
     title: {
       type: String,
@@ -37,6 +38,11 @@ export default defineComponent({
     icon: {
       type: String,
       default: "",
+    },
+  },
+  methods: {
+    selectApp() {
+      this.$emit("on-selected-app", this.title);
     },
   },
 });

@@ -57,7 +57,7 @@
       </q-card>
     </q-dialog>
 
-    <channels-list :channels="channels"></channels-list>
+    <channel-item :channels="channels"></channel-item>
 
     <q-page-sticky position="bottom-right" :offset="[50, 50]">
       <q-btn fab icon="add" color="accent" @click="addChannel" />
@@ -67,7 +67,7 @@
 
 <script>
 import { defineComponent } from "vue";
-import ChannelsList from "../components/youtube-channels/ChannelItem.vue";
+import ChannelItem from "../components/youtube-channels/ChannelItem.vue";
 
 export default defineComponent({
   name: "ChannelsPage",
@@ -80,7 +80,7 @@ export default defineComponent({
     };
   },
   components: {
-    ChannelsList,
+    ChannelItem,
   },
   computed: {
     channels() {
@@ -90,6 +90,7 @@ export default defineComponent({
     },
   },
   created() {
+    this.fetchChannels();
     this.channelsList = this.channels;
   },
   methods: {
@@ -98,11 +99,11 @@ export default defineComponent({
     },
     confirmAddChannel() {
       const name = this.promptChannelName;
-      const id = this.promptChannelId;
+      const identificator = this.promptChannelId;
 
       const channel = {
         name: name,
-        channelId: id,
+        channelIdentificator: identificator,
       };
 
       this.$store.dispatch("ytChannels/addChannel", channel);
@@ -110,6 +111,9 @@ export default defineComponent({
       this.promptAddChannel = false;
       this.promptChannelName = null;
       this.promptChannelId = null;
+    },
+    fetchChannels() {
+      this.$store.dispatch("ytChannels/fetchChannels");
     },
   },
 });

@@ -11,7 +11,7 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Synchronizer </q-toolbar-title>
+        <q-toolbar-title> {{ currentAppTitle }} </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
@@ -25,6 +25,7 @@
           v-for="link in linksList"
           :key="link.title"
           v-bind="link"
+          @on-selected-app="onSelectedApp"
         />
       </q-list>
     </q-drawer>
@@ -32,7 +33,7 @@
     <q-page-container>
       <router-view v-slot="{ Component }">
         <keep-alive>
-          <component :is="Component" />
+          <component :is="Component" v-model="crtComponent" />
         </keep-alive>
       </router-view>
     </q-page-container>
@@ -69,13 +70,20 @@ export default defineComponent({
     return {
       linksList,
       leftDrawerOpen: false,
+      currentAppTitle: "",
+      crtComponent: null,
     };
   },
-
   methods: {
     toggleLeftDrawer() {
       this.leftDrawerOpen = !this.leftDrawerOpen;
     },
+    onSelectedApp(appTitle) {
+      this.currentAppTitle = appTitle;
+    },
+  },
+  created() {
+    this.currentAppTitle = this.$route.meta.title;
   },
 });
 </script>
