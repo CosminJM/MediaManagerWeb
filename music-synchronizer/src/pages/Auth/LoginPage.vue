@@ -112,7 +112,9 @@ export default {
           this.$router.replace("/yt-channels");
           this.$q.loading.hide();
         }
-      } catch (error) {}
+      } catch (error) {
+        this.$q.loading.hide();
+      }
     },
     async onRegisterSubmit() {
       try {
