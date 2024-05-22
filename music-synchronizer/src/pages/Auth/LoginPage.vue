@@ -105,10 +105,12 @@ export default {
     async onLoginSubmit() {
       try {
         if (this.loginForm.username && this.loginForm.password) {
+          this.$q.loading.show();
           await this.$store.dispatch("login", { ...this.loginForm });
           this.loginForm.username = "";
           this.loginForm.password = "";
           this.$router.replace("/yt-channels");
+          this.$q.loading.hide();
         }
       } catch (error) {}
     },

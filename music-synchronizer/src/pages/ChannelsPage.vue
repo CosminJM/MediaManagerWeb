@@ -97,7 +97,8 @@ export default defineComponent({
     addChannel() {
       this.promptAddChannel = true;
     },
-    confirmAddChannel() {
+    //TODO when I add a channel it won't have an id in the list, this means I can't delete it because it needs an id retrieved from DB
+    async confirmAddChannel() {
       const name = this.promptChannelName;
       const identificator = this.promptChannelId;
 
@@ -105,15 +106,20 @@ export default defineComponent({
         name: name,
         channelIdentificator: identificator,
       };
+      this.$q.loading.show();
 
-      this.$store.dispatch("ytChannels/addChannel", channel);
+      await this.$store.dispatch("ytChannels/addChannel", channel);
+
+      this.$q.loading.hide();
 
       this.promptAddChannel = false;
       this.promptChannelName = null;
       this.promptChannelId = null;
     },
-    fetchChannels() {
-      this.$store.dispatch("ytChannels/fetchChannels");
+    async fetchChannels() {
+      this.$q.loading.show();
+      await this.$store.dispatch("ytChannels/fetchChannels");
+      this.$q.loading.hide();
     },
   },
 });

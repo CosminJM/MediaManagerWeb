@@ -80,10 +80,12 @@ export default {
           ok: true, // shows the ok button
           focus: "none",
         })
-        .onOk(() => {
-          this.$store.dispatch("ytChannels/deleteChannel", {
+        .onOk(async () => {
+          this.$q.loading.show();
+          await this.$store.dispatch("ytChannels/deleteChannel", {
             channelId: channelId,
           });
+          this.$q.loading.hide();
         })
         .onCancel(() => {});
     },
@@ -93,11 +95,13 @@ export default {
     },
     async updateChannelConfirm() {
       console.log(this.selectedChannel);
+      this.$q.loading.show();
       await this.$store.dispatch("ytChannels/updateChannel", {
         channelId: this.selectedChannel.channelId,
         channelIdentificator: this.selectedChannel.channelIdentificator,
         name: this.selectedChannel.name,
       });
+      this.$q.loading.hide();
       this.selectedChannel = null;
     },
   },
