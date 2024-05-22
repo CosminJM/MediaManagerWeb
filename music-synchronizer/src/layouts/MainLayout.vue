@@ -13,7 +13,15 @@
 
         <q-toolbar-title> {{ currentAppTitle }} </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div>Hello, {{ username }}</div>
+
+        <q-btn
+          v-if="isAuthenticated"
+          flat
+          color="white"
+          icon="logout"
+          @click="logout"
+        />
       </q-toolbar>
     </q-header>
 
@@ -55,7 +63,7 @@ const linksList = [
     title: "Chat",
     caption: "github.com/quasarframework",
     icon: "rss_feed",
-    link: "/",
+    link: "/chatline",
   },
 ];
 
@@ -74,12 +82,24 @@ export default defineComponent({
       crtComponent: null,
     };
   },
+  computed: {
+    isAuthenticated() {
+      return this.$store.getters.isAuthenticated;
+    },
+    username() {
+      return this.$store.getters.username;
+    },
+  },
   methods: {
     toggleLeftDrawer() {
       this.leftDrawerOpen = !this.leftDrawerOpen;
     },
     onSelectedApp(appTitle) {
       this.currentAppTitle = appTitle;
+    },
+    logout() {
+      this.$store.dispatch("logout");
+      this.$router.push("/login");
     },
   },
   created() {

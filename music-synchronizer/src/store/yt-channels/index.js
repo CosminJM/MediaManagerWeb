@@ -1,18 +1,18 @@
-import api from "../../util/api.js";
+import { api } from "../../boot/axios";
 import { Notify } from "quasar";
 
-const notifySuccess = () => {
+const notifySuccess = (message = "Operation successful!") => {
   Notify.create({
     type: "positive",
-    message: "Operation successful!",
+    message: message,
     timeout: 1000,
   });
 };
 
-const notifyFailure = () => {
+const notifyFailure = (message = "Operation failed!") => {
   Notify.create({
     type: "negative",
-    message: "Operation failed!",
+    message: message,
     timeout: 1000,
   });
 };
@@ -54,7 +54,6 @@ export default {
         context.commit("deleteChannel", payload);
         notifySuccess();
       } catch (error) {
-        console.log(`Fetch channels error:  ${error}`);
         notifyFailure();
       }
     },
@@ -63,10 +62,10 @@ export default {
         await api.post("https://localhost:7000/api/channels", payload);
 
         context.commit("addChannel", payload);
-        notifySuccess();
+        notifySuccess("Channel added");
       } catch (error) {
         console.log(`Add channel error:  ${error}`);
-        notifyFailure();
+        notifyFailure(error.response.data);
       }
     },
     async fetchChannels(context) {

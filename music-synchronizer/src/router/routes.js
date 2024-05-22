@@ -1,19 +1,25 @@
 const routes = [
   {
     path: "/",
+    redirect: "/yt-channels",
     component: () => import("layouts/MainLayout.vue"),
     children: [
       {
-        path: "",
+        path: "/chatline",
         component: () => import("pages/IndexPage.vue"),
-        meta: { title: "Chatline" },
+        meta: { requiresAuth: true, title: "Chatline" },
       },
       {
         path: "/yt-channels",
         component: () => import("pages/ChannelsPage.vue"),
-        meta: { title: "Youtube channels" },
+        meta: { requiresAuth: true, title: "Youtube channels" },
       },
     ],
+  },
+  {
+    path: "/login",
+    component: () => import("pages/Auth/LoginPage.vue"),
+    meta: { requiresAuth: false },
   },
 
   // Always leave this as last one,
