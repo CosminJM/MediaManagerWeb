@@ -5,11 +5,6 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [
       {
-        path: "/chatline",
-        component: () => import("pages/IndexPage.vue"),
-        meta: { requiresAuth: true, title: "Chatline" },
-      },
-      {
         path: "/yt-channels",
         component: () => import("pages/ChannelsPage.vue"),
         meta: { requiresAuth: true, title: "Youtube channels" },

@@ -44,39 +44,6 @@ export default boot(async ({ app, router }) => {
       return Promise.reject(error);
     }
   );
-
-  // api.interceptors.response.use(
-  //   (response) => response,
-  //   async (error) => {
-  //     const originalRequest = error.config;
-
-  //     // If the request returns a 401 Unauthorized response
-  //     if (error.response.status === 401 && !originalRequest._retry) {
-  //       originalRequest._retry = true;
-
-  //       try {
-  //         // Refresh the token
-  //         // await store.dispatch("refreshToken");
-
-  //         // Retry the original request with the new token
-  //         const token = store.getters.token;
-  //         if (token) {
-  //           originalRequest.headers.Authorization = `Bearer ${token}`;
-  //           return api(originalRequest);
-  //         }
-  //       } catch (refreshError) {
-  //         // Handle token refresh failure
-  //         console.error("Token refresh failed:", refreshError);
-  //         store.dispatch("logout");
-  //         router.push("/login");
-  //         return Promise.reject(refreshError);
-  //       }
-  //     }
-
-  //     // Forward other errors
-  //     return Promise.reject(error);
-  //   }
-  // );
 });
 
 export { api };

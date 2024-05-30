@@ -59,12 +59,6 @@ const linksList = [
     icon: "music_video",
     link: "/yt-channels",
   },
-  {
-    title: "Chat",
-    caption: "github.com/quasarframework",
-    icon: "rss_feed",
-    link: "/chatline",
-  },
 ];
 
 export default defineComponent({

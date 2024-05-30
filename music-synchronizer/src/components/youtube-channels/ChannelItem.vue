@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md row items-start q-gutter-md">
+  <div class="q-pa-md row items-center justify-center q-gutter-md">
     <q-dialog v-model="modifyChannelDialogShow" persistent>
       <q-card style="min-width: 350px">
         <q-card-section>

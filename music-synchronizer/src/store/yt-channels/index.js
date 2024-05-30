@@ -47,9 +47,7 @@ export default {
   actions: {
     async deleteChannel(context, payload) {
       try {
-        await api.delete(
-          `https://localhost:7000/api/channels/${payload.channelId}`
-        );
+        await api.delete(`channels/${payload.channelId}`);
 
         context.commit("deleteChannel", payload);
         notifySuccess();
@@ -59,7 +57,7 @@ export default {
     },
     async addChannel(context, payload) {
       try {
-        await api.post("https://localhost:7000/api/channels", payload);
+        await api.post("channels", payload);
 
         context.commit("addChannel", payload);
         notifySuccess("Channel added");
@@ -70,7 +68,7 @@ export default {
     },
     async fetchChannels(context) {
       try {
-        const response = await api.get("https://localhost:7000/api/channels");
+        const response = await api.get("channels");
 
         const responseData = response.data;
 
@@ -83,13 +81,10 @@ export default {
     },
     async updateChannel(context, payload) {
       try {
-        await api.put(
-          `https://localhost:7000/api/channels/${payload.channelId}`,
-          {
-            channelIdentificator: payload.channelIdentificator,
-            name: payload.name,
-          }
-        );
+        await api.put(`channels/${payload.channelId}`, {
+          channelIdentificator: payload.channelIdentificator,
+          name: payload.name,
+        });
 
         context.commit("updateChannel", payload);
         notifySuccess();
