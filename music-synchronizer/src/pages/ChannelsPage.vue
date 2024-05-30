@@ -1,26 +1,6 @@
 <template>
   <q-page>
-    <q-toolbar class="bg-primary text-white">
-      <q-input
-        label="Search channels"
-        color="white"
-        dark
-        borderless
-        v-model="searchText"
-        input-class="text-middle"
-        class="q-ml-md"
-      >
-        <template #append>
-          <q-icon v-if="searchText === ''" name="search" />
-          <q-icon
-            v-else
-            name="clear"
-            class="cursor-pointer"
-            @click="searchText = ''"
-          />
-        </template>
-      </q-input>
-    </q-toolbar>
+    <search-input v-model="searchText" label="Search channels"></search-input>
 
     <q-dialog v-model="promptAddChannel" persistent>
       <q-card style="min-width: 350px">
@@ -68,6 +48,7 @@
 <script>
 import { defineComponent } from "vue";
 import ChannelItem from "../components/youtube-channels/ChannelItem.vue";
+import SearchInput from "../components/ui/SearchInput.vue";
 
 export default defineComponent({
   name: "ChannelsPage",
@@ -81,6 +62,7 @@ export default defineComponent({
   },
   components: {
     ChannelItem,
+    SearchInput,
   },
   computed: {
     channels() {
