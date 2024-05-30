@@ -21,27 +21,31 @@ export default {
   namespaced: true,
   state() {
     return {
-      channels: [],
+      channels: {
+        totalPages: 1,
+        items: [],
+      },
     };
   },
   mutations: {
     deleteChannel(state, payload) {
-      const channelIndex = state.channels.findIndex(
+      const channelIndex = state.channels.items.findIndex(
         (c) => c.channelId === payload.channelId
       );
-      state.channels.splice(channelIndex, 1);
+      state.channels.items.splice(channelIndex, 1);
     },
     addChannel(state, payload) {
       state.channels.push(payload);
     },
     setChannels(state, payload) {
-      state.channels = payload;
+      state.channels.items = payload.responseData;
+      state.channels.totalPages = payload.totalPages;
     },
     updateChannel(state, payload) {
-      var indexToReplace = state.channels.findIndex(
+      var indexToReplace = state.channels.items.findIndex(
         (c) => c.channelId === payload.channelId
       );
-      state.channels[indexToReplace] = payload;
+      state.channels.items[indexToReplace] = payload;
     },
   },
   actions: {
@@ -66,9 +70,11 @@ export default {
         notifyFailure(error.response.data);
       }
     },
-    async fetchChannels(context) {
+    async fetchChannels(context, payload) {
       try {
-        const response = await api.get("channels");
+        const response = await api.get(
+          `/channels?pageNumber=${payload.pageNumber}&pageSize=${payload.pageSize}`
+        );
 
         const responseData = response.data;
 
@@ -96,7 +102,10 @@ export default {
   },
   getters: {
     channels(state) {
-      return state.channels;
+      return state.channels.items;
+    },
+    totalPages(state) {
+      return state.channels.totalPages;
     },
   },
 };

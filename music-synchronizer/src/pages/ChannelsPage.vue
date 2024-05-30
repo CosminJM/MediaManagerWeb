@@ -39,6 +39,15 @@
 
     <channel-item :channels="channels"></channel-item>
 
+    <div class="q-pa-lg flex flex-center">
+      <q-pagination
+        v-model="pageNumber"
+        :max="totalPages"
+        input
+        @update:model-value="nextPage"
+      />
+    </div>
+
     <q-page-sticky position="bottom-right" :offset="[50, 50]">
       <q-btn fab icon="add" color="accent" @click="addChannel" />
     </q-page-sticky>
@@ -58,6 +67,10 @@ export default defineComponent({
       promptChannelName: null,
       promptChannelId: null,
       searchText: "",
+      pageNumber: 1,
+      //hardcoded for now
+      //TODO An UI control item must be implemented for user to change page size
+      pageSize: 100,
     };
   },
   components: {
@@ -70,10 +83,12 @@ export default defineComponent({
         c.name.toLowerCase().includes(this.searchText.toLowerCase())
       );
     },
+    totalPages() {
+      return this.$store.getters["ytChannels/totalPages"];
+    },
   },
   created() {
-    this.fetchChannels();
-    this.channelsList = this.channels;
+    this.fetchChannels(this.pageNumber, this.pageSize);
   },
   methods: {
     addChannel() {
@@ -98,10 +113,17 @@ export default defineComponent({
       this.promptChannelName = null;
       this.promptChannelId = null;
     },
-    async fetchChannels() {
+    async fetchChannels(pageNumber, pageSize) {
       this.$q.loading.show();
-      await this.$store.dispatch("ytChannels/fetchChannels");
+      await this.$store.dispatch("ytChannels/fetchChannels", {
+        pageNumber,
+        pageSize,
+      });
       this.$q.loading.hide();
+    },
+    async nextPage(pageNumber) {
+      this.pageNumber = pageNumber;
+      await this.fetchChannels(this.pageNumber, this.pageSize);
     },
   },
 });
