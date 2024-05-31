@@ -35,7 +35,7 @@ export default {
       state.channels.items.splice(channelIndex, 1);
     },
     addChannel(state, payload) {
-      state.channels.push(payload);
+      state.channels.items.push(payload);
     },
     setChannels(state, payload) {
       state.channels.items = payload.responseData;
@@ -73,7 +73,7 @@ export default {
     async fetchChannels(context, payload) {
       try {
         const response = await api.get(
-          `/channels?pageNumber=${payload.pageNumber}&pageSize=${payload.pageSize}`
+          `/channels?pageNumber=${payload.pageNumber}&pageSize=${payload.pageSize}&search=${payload.search}`
         );
 
         const responseData = response.data;

@@ -92,7 +92,7 @@ export default {
 
         notifySuccess(response.data);
       } catch (error) {
-        notifyFailure();
+        notifyFailure(error.response.data);
         throw error;
       }
     },

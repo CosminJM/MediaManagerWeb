@@ -58,6 +58,7 @@
 import { defineComponent } from "vue";
 import ChannelItem from "../components/youtube-channels/ChannelItem.vue";
 import SearchInput from "../components/ui/SearchInput.vue";
+import { debounce } from "quasar";
 
 export default defineComponent({
   name: "ChannelsPage",
@@ -79,16 +80,18 @@ export default defineComponent({
   },
   computed: {
     channels() {
-      return this.$store.getters["ytChannels/channels"].filter((c) =>
-        c.name.toLowerCase().includes(this.searchText.toLowerCase())
-      );
+      return this.$store.getters["ytChannels/channels"];
     },
     totalPages() {
       return this.$store.getters["ytChannels/totalPages"];
     },
   },
   created() {
-    this.fetchChannels(this.pageNumber, this.pageSize);
+    this.fetchChannels(this.pageNumber, this.pageSize, this.searchText);
+    // Debounce function makes sure to execute only if
+    // within 500ms interval, there was only one call to the method
+    // otherwise the method delays its execution by another 500ms
+    this.fetchChannels = debounce(this.fetchChannels, 500);
   },
   methods: {
     addChannel() {
@@ -113,17 +116,27 @@ export default defineComponent({
       this.promptChannelName = null;
       this.promptChannelId = null;
     },
-    async fetchChannels(pageNumber, pageSize) {
+    async fetchChannels(pageNumber, pageSize, search) {
       this.$q.loading.show();
       await this.$store.dispatch("ytChannels/fetchChannels", {
         pageNumber,
         pageSize,
+        search,
       });
       this.$q.loading.hide();
     },
     async nextPage(pageNumber) {
       this.pageNumber = pageNumber;
-      await this.fetchChannels(this.pageNumber, this.pageSize);
+      await this.fetchChannels(this.pageNumber, this.pageSize, this.searchText);
+    },
+  },
+  watch: {
+    searchText(newText) {
+      //first we set the text
+      this.searchText = newText;
+      // the change the page as it would trigger nextPage function before the text being set
+      this.pageNumber = 1;
+      this.fetchChannels(this.pageNumber, this.pageSize, this.searchText);
     },
   },
 });
