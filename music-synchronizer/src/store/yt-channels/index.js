@@ -61,9 +61,9 @@ export default {
     },
     async addChannel(context, payload) {
       try {
-        await api.post("channels", payload);
+        const response = await api.post("channels", payload);
 
-        context.commit("addChannel", payload);
+        context.commit("addChannel", response.data);
         notifySuccess("Channel added");
       } catch (error) {
         console.log(`Add channel error:  ${error}`);
