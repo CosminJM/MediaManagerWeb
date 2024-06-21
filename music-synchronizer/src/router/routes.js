@@ -6,7 +6,7 @@ const routes = [
     children: [
       {
         path: "/yt-channels",
-        component: () => import("pages/ChannelsPage.vue"),
+        component: () => import("pages/channels/ChannelsPage.vue"),
         meta: { requiresAuth: true, title: "Youtube channels" },
       },
     ],

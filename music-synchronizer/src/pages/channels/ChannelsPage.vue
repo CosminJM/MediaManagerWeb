@@ -56,9 +56,10 @@
 
 <script>
 import { defineComponent } from "vue";
-import ChannelItem from "../components/youtube-channels/ChannelItem.vue";
-import SearchInput from "../components/ui/SearchInput.vue";
+import ChannelItem from "../../components/youtube-channels/ChannelItem.vue";
+import SearchInput from "../../components/ui/SearchInput.vue";
 import { debounce } from "quasar";
+import { ChannelsQuery } from "./channelsPage-graphql.js";
 
 export default defineComponent({
   name: "ChannelsPage",
@@ -68,6 +69,7 @@ export default defineComponent({
       promptChannelName: null,
       promptChannelId: null,
       searchText: "",
+      // fetchedChannels: null,
       pageNumber: 1,
       //hardcoded for now
       //TODO An UI control item must be implemented for user to change page size
@@ -80,13 +82,27 @@ export default defineComponent({
   },
   computed: {
     channels() {
+      // return this.fetchedChannels;
       return this.$store.getters["ytChannels/channels"];
     },
     totalPages() {
       return this.$store.getters["ytChannels/totalPages"];
     },
   },
-  created() {
+  async created() {
+    // try {
+    //   this.$q.loading.show();
+    //   const response = await this.$apollo.query({
+    //     query: ChannelsQuery,
+    //   });
+    //   console.log(response.data);
+    //   this.fetchedChannels = response.data.channels;
+    //   this.$q.loading.hide();
+    // } catch (e) {
+    //   console.log(e);
+    // } finally {
+    //   this.$q.loading.hide();
+    // }
     this.fetchChannels(this.pageNumber, this.pageSize, this.searchText);
     // Debounce function makes sure to execute only if
     // within 500ms interval, there was only one call to the method
