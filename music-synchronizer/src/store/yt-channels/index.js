@@ -1,5 +1,11 @@
 import { api } from "../../boot/axios";
 import { Notify } from "quasar";
+import gql from "graphql-tag";
+import { apolloClient } from "boot/apollo";
+import {
+  AddChannelMutation,
+  PaginatedChannelsQuery,
+} from "../../pages/channels/channelsPage-graphql.js";
 
 const notifySuccess = (message = "Operation successful!") => {
   Notify.create({
@@ -21,10 +27,11 @@ export default {
   namespaced: true,
   state() {
     return {
-      channels: {
-        totalPages: 1,
-        items: [],
-      },
+      channels: [],
+      pageInfo: {},
+      totalCount: 0,
+      pageCursors: {}, // Store cursors for each page
+      currentPage: 1, // Track the current page
     };
   },
   mutations: {
@@ -35,11 +42,26 @@ export default {
       state.channels.items.splice(channelIndex, 1);
     },
     addChannel(state, payload) {
-      state.channels.items.push(payload);
+      state.channels.push(payload);
     },
     setChannels(state, payload) {
-      state.channels.items = payload.responseData;
-      state.channels.totalPages = payload.totalPages;
+      state.channels = payload;
+    },
+    setPageInfo(state, payload) {
+      state.pageInfo = payload;
+    },
+    setTotalCount(state, payload) {
+      state.totalCount = payload;
+    },
+    setPageCursors(state, payload) {
+      if (!state.pageCursors[payload.page]) {
+        state.pageCursors[payload.page] = {};
+      }
+      state.pageCursors[payload.page].endCursor = payload.endCursor;
+      state.pageCursors[payload.page].startCursor = payload.startCursor;
+    },
+    setCurrentPage(state, payload) {
+      state.currentPage = payload.page;
     },
     updateChannel(state, payload) {
       var indexToReplace = state.channels.items.findIndex(
@@ -61,28 +83,94 @@ export default {
     },
     async addChannel(context, payload) {
       try {
-        const response = await api.post("channels", payload);
+        // const response = await api.post("channels", payload);
 
+        const response = await apolloClient.mutate({
+          mutation: AddChannelMutation,
+          variables: {
+            channelForCreationDto: payload,
+          },
+        });
+
+        console.log(response);
         context.commit("addChannel", response.data);
         notifySuccess("Channel added");
       } catch (error) {
         console.log(`Add channel error:  ${error}`);
-        notifyFailure(error.response.data);
+        notifyFailure(error.response);
       }
     },
     async fetchChannels(context, payload) {
       try {
-        const response = await api.get(
-          `/channels?pageNumber=${payload.pageNumber}&pageSize=${payload.pageSize}&search=${payload.search}`
+        const response = await apolloClient.query({
+          query: PaginatedChannelsQuery,
+          variables: {
+            first: payload.pageSize,
+            after: payload.afterCursor,
+            before: payload.beforeCursor,
+          },
+        });
+        console.log(response.data);
+        console.log("page cursors", context.state.pageCursors);
+        const channels = response.data.paginatedChannels.edges.map(
+          (edge) => edge.node
         );
-
-        const responseData = response.data;
-
-        context.commit("setChannels", responseData);
+        const pageInfo = response.data.paginatedChannels.pageInfo;
+        const totalCount = response.data.paginatedChannels.totalCount;
+        context.commit("setChannels", channels);
+        context.commit("setPageInfo", pageInfo);
+        context.commit("setTotalCount", totalCount);
+        context.commit("setPageCursors", {
+          page: context.state.currentPage,
+          endCursor: response.data.paginatedChannels.pageInfo.endCursor,
+          startCursor: response.data.paginatedChannels.pageInfo.startCursor,
+        });
         notifySuccess();
-      } catch (error) {
-        console.log(`Fetch channels error:  ${error}`);
+      } catch (e) {
+        console.log(e);
         notifyFailure();
+      }
+    },
+    async fetchCursorsToPage(context, payload) {
+      let currentPage = 1;
+      let after = null;
+
+      while (currentPage < payload.targetPage) {
+        const query = gql`
+          query PaginatedChannels($first: Int!, $after: String) {
+            paginatedChannels(first: $first, after: $after) {
+              pageInfo {
+                endCursor
+                startCursor
+              }
+            }
+          }
+        `;
+
+        try {
+          const response = await apolloClient.query({
+            query,
+            variables: {
+              first: payload.first,
+              after,
+            },
+          });
+
+          const endCursor = response.data.paginatedChannels.pageInfo.endCursor;
+          const startCursor =
+            response.data.paginatedChannels.pageInfo.startCursor;
+          context.commit("setPageCursors", {
+            page: currentPage,
+            endCursor,
+            startCursor,
+          });
+
+          after = endCursor;
+          currentPage++;
+        } catch (error) {
+          console.log(error);
+          break;
+        }
       }
     },
     async updateChannel(context, payload) {
@@ -102,10 +190,19 @@ export default {
   },
   getters: {
     channels(state) {
-      return state.channels.items;
+      return state.channels;
     },
-    totalPages(state) {
-      return state.channels.totalPages;
+    totalCount(state) {
+      return state.totalCount;
+    },
+    pageInfo(state) {
+      return state.pageInfo;
+    },
+    pageCursors(state) {
+      return state.pageCursors;
+    },
+    currentPage(state) {
+      return state.currentPage;
     },
   },
 };

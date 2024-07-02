@@ -1,36 +1,63 @@
 import { boot } from "quasar/wrappers";
+import store from "../store/index.js";
 import {
   ApolloClient,
   InMemoryCache,
   HttpLink,
   ApolloLink,
-  concat,
 } from "@apollo/client/core";
+import { onError } from "@apollo/client/link/error";
 
-// Replace this with your GraphQL endpoint
-const httpLink = new HttpLink({
-  uri: "http://localhost:5013/graphql",
-});
-
-// Middleware to add the Bearer token to the request headers
-const authMiddleware = new ApolloLink((operation, forward) => {
-  const token = localStorage.getItem("token") || "";
-
-  operation.setContext({
-    headers: {
-      authorization: token ? `Bearer ${token}` : "",
-    },
+function createApolloClient(router, store) {
+  const httpLink = new HttpLink({
+    uri: "http://localhost:5013/graphql",
   });
 
-  return forward(operation);
-});
+  // Middleware to add the Bearer token to the request headers
+  const authMiddleware = new ApolloLink((operation, forward) => {
+    const token = localStorage.getItem("token") || "";
 
-const apolloClient = new ApolloClient({
-  link: concat(authMiddleware, httpLink),
-  cache: new InMemoryCache(),
-});
+    operation.setContext({
+      headers: {
+        authorization: token ? `Bearer ${token}` : "",
+      },
+    });
 
-export default boot(({ app }) => {
+    return forward(operation);
+  });
+
+  // Error link to handle errors globally
+  const errorLink = onError(({ graphQLErrors, networkError }) => {
+    if (graphQLErrors) {
+      graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+        if (extensions && extensions.code === "AUTH_NOT_AUTHORIZED") {
+          // Handle 401 Unauthorized error here
+          console.log("Unauthorized access - Redirecting to login");
+          store.dispatch("logout");
+          router.push("/login");
+        }
+      });
+    }
+
+    if (networkError && networkError.statusCode === 401) {
+      // Handle network 401 error
+      console.log("Unauthorized access - Redirecting to login");
+      store.dispatch("logout");
+      router.push("/login");
+    }
+  });
+
+  return new ApolloClient({
+    link: ApolloLink.from([authMiddleware, errorLink, httpLink]),
+    cache: new InMemoryCache(),
+  });
+}
+
+let apolloClient;
+
+export default boot(({ app, router }) => {
+  apolloClient = createApolloClient(router, store);
+
   app.config.globalProperties.$apollo = apolloClient;
 });
 

@@ -59,7 +59,7 @@ import { defineComponent } from "vue";
 import ChannelItem from "../../components/youtube-channels/ChannelItem.vue";
 import SearchInput from "../../components/ui/SearchInput.vue";
 import { debounce } from "quasar";
-import { ChannelsQuery } from "./channelsPage-graphql.js";
+import { mapGetters } from "vuex";
 
 export default defineComponent({
   name: "ChannelsPage",
@@ -81,29 +81,22 @@ export default defineComponent({
     SearchInput,
   },
   computed: {
-    channels() {
-      // return this.fetchedChannels;
-      return this.$store.getters["ytChannels/channels"];
-    },
+    ...mapGetters("ytChannels", [
+      "channels",
+      "totalCount",
+      "pageInfo",
+      "pageCursors",
+      "currentPage",
+    ]),
     totalPages() {
-      return this.$store.getters["ytChannels/totalPages"];
+      return Math.ceil(this.totalCount / this.pageSize);
     },
   },
   async created() {
-    // try {
-    //   this.$q.loading.show();
-    //   const response = await this.$apollo.query({
-    //     query: ChannelsQuery,
-    //   });
-    //   console.log(response.data);
-    //   this.fetchedChannels = response.data.channels;
-    //   this.$q.loading.hide();
-    // } catch (e) {
-    //   console.log(e);
-    // } finally {
-    //   this.$q.loading.hide();
-    // }
-    this.fetchChannels(this.pageNumber, this.pageSize, this.searchText);
+    await this.$store.commit("ytChannels/setCurrentPage", {
+      page: this.pageNumber,
+    });
+    this.fetchChannels(this.pageSize, null, null);
     // Debounce function makes sure to execute only if
     // within 500ms interval, there was only one call to the method
     // otherwise the method delays its execution by another 500ms
@@ -132,18 +125,42 @@ export default defineComponent({
       this.promptChannelName = null;
       this.promptChannelId = null;
     },
-    async fetchChannels(pageNumber, pageSize, search) {
+    async fetchChannels(pageSize, afterCursor, beforeCursor) {
       this.$q.loading.show();
       await this.$store.dispatch("ytChannels/fetchChannels", {
-        pageNumber,
         pageSize,
-        search,
+        afterCursor,
+        beforeCursor,
       });
       this.$q.loading.hide();
     },
     async nextPage(pageNumber) {
+      // Prefetch cursors for all pages up to the target page
+      if (!this.pageCursors[pageNumber - 1]?.endCursor) {
+        await this.$store.dispatch("ytChannels/fetchCursorsToPage", {
+          targetPage: pageNumber,
+          first: this.pageSize,
+        });
+      }
+
+      const cursor = this.pageCursors[pageNumber - 1]?.endCursor;
+
+      const variables = {
+        first: this.pageSize,
+        afterCursor: cursor,
+        beforeCursor: null,
+      };
+
+      await this.fetchChannels(
+        variables.first,
+        variables.afterCursor,
+        variables.beforeCursor
+      );
+
+      await this.$store.commit("ytChannels/setCurrentPage", {
+        page: this.pageNumber,
+      });
       this.pageNumber = pageNumber;
-      await this.fetchChannels(this.pageNumber, this.pageSize, this.searchText);
     },
   },
   watch: {
