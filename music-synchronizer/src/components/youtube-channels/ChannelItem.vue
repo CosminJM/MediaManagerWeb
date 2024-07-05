@@ -82,9 +82,7 @@ export default {
         })
         .onOk(async () => {
           this.$q.loading.show();
-          await this.$store.dispatch("ytChannels/deleteChannel", {
-            channelId: channelId,
-          });
+          await this.$store.dispatch("ytChannels/deleteChannel", channelId);
           this.$q.loading.hide();
         })
         .onCancel(() => {});
@@ -102,6 +100,7 @@ export default {
         name: this.selectedChannel.name,
       });
       this.$q.loading.hide();
+      this.modifyChannelDialogShow = false;
       this.selectedChannel = null;
     },
   },

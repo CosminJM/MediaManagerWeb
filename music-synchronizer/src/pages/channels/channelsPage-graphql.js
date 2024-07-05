@@ -33,3 +33,24 @@ export const AddChannelMutation = gql`
     }
   }
 `;
+
+export const DeleteChannelMutation = gql`
+  mutation DeleteChannel($channelId: String!) {
+    deleteChannel(channelId: $channelId) {
+      error
+    }
+  }
+`;
+
+export const UpdateChannelMutation = gql`
+  mutation UpdateChannel($channelForUpdateDto: ChannelForUpdateDtoInput!) {
+    updateChannel(channelForUpdateDto: $channelForUpdateDto) {
+      error
+      data {
+        channelId
+        channelIdentificator
+        name
+      }
+    }
+  }
+`;

@@ -4,7 +4,9 @@ import gql from "graphql-tag";
 import { apolloClient } from "boot/apollo";
 import {
   AddChannelMutation,
+  DeleteChannelMutation,
   PaginatedChannelsQuery,
+  UpdateChannelMutation,
 } from "../../pages/channels/channelsPage-graphql.js";
 
 const notifySuccess = (message = "Operation successful!") => {
@@ -36,10 +38,10 @@ export default {
   },
   mutations: {
     deleteChannel(state, payload) {
-      const channelIndex = state.channels.items.findIndex(
-        (c) => c.channelId === payload.channelId
+      const channelIndex = state.channels.findIndex(
+        (c) => c.channelId === payload
       );
-      state.channels.items.splice(channelIndex, 1);
+      state.channels.splice(channelIndex, 1);
     },
     addChannel(state, payload) {
       state.channels.push(payload);
@@ -64,17 +66,26 @@ export default {
       state.currentPage = payload.page;
     },
     updateChannel(state, payload) {
-      var indexToReplace = state.channels.items.findIndex(
+      var indexToReplace = state.channels.findIndex(
         (c) => c.channelId === payload.channelId
       );
-      state.channels.items[indexToReplace] = payload;
+      state.channels[indexToReplace] = payload;
     },
   },
   actions: {
     async deleteChannel(context, payload) {
       try {
-        await api.delete(`channels/${payload.channelId}`);
+        const response = await apolloClient.mutate({
+          mutation: DeleteChannelMutation,
+          variables: {
+            channelId: payload,
+          },
+        });
 
+        if (response.data.deleteChannel.error != null) {
+          notifyFailure();
+          return;
+        }
         context.commit("deleteChannel", payload);
         notifySuccess();
       } catch (error) {
@@ -83,17 +94,17 @@ export default {
     },
     async addChannel(context, payload) {
       try {
-        // const response = await api.post("channels", payload);
-
         const response = await apolloClient.mutate({
           mutation: AddChannelMutation,
           variables: {
             channelForCreationDto: payload,
           },
         });
-
-        console.log(response);
-        context.commit("addChannel", response.data);
+        if (response.data.addChannel.error != null) {
+          notifyFailure();
+          return;
+        }
+        context.commit("addChannel", response.data.addChannel.data);
         notifySuccess("Channel added");
       } catch (error) {
         console.log(`Add channel error:  ${error}`);
@@ -110,7 +121,11 @@ export default {
             before: payload.beforeCursor,
           },
         });
-        console.log(response.data);
+        if (response.data.paginatedChannels.error != null) {
+          notifyFailure();
+          return;
+        }
+        console.log(response.data.paginatedChannels);
         console.log("page cursors", context.state.pageCursors);
         const channels = response.data.paginatedChannels.edges.map(
           (edge) => edge.node
@@ -175,15 +190,19 @@ export default {
     },
     async updateChannel(context, payload) {
       try {
-        await api.put(`channels/${payload.channelId}`, {
-          channelIdentificator: payload.channelIdentificator,
-          name: payload.name,
+        const response = await apolloClient.mutate({
+          mutation: UpdateChannelMutation,
+          variables: { channelForUpdateDto: payload },
         });
-
+        console.log(response.data);
+        if (response.data.updateChannel.error != null) {
+          notifyFailure();
+          return;
+        }
         context.commit("updateChannel", payload);
         notifySuccess();
       } catch (error) {
-        console.log(`Fetch channels error:  ${error}`);
+        console.log("Update channel error", error);
         notifyFailure();
       }
     },
