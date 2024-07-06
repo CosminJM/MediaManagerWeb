@@ -1,7 +1,17 @@
 import gql from "graphql-tag";
 export const PaginatedChannelsQuery = gql`
-  query PaginatedChannels($first: Int!, $after: String, $before: String) {
-    paginatedChannels(first: $first, after: $after, before: $before) {
+  query PaginatedChannels(
+    $first: Int!
+    $after: String
+    $before: String
+    $search: String
+  ) {
+    paginatedChannels(
+      first: $first
+      after: $after
+      before: $before
+      search: $search
+    ) {
       edges {
         cursor
         node {

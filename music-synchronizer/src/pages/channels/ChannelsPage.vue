@@ -69,9 +69,7 @@ export default defineComponent({
       promptChannelName: null,
       promptChannelId: null,
       searchText: "",
-      // fetchedChannels: null,
       pageNumber: 1,
-      //hardcoded for now
       //TODO An UI control item must be implemented for user to change page size
       pageSize: 100,
     };
@@ -96,7 +94,7 @@ export default defineComponent({
     await this.$store.commit("ytChannels/setCurrentPage", {
       page: this.pageNumber,
     });
-    this.fetchChannels(this.pageSize, null, null);
+    this.fetchChannels(this.pageSize, null, null, null);
     // Debounce function makes sure to execute only if
     // within 500ms interval, there was only one call to the method
     // otherwise the method delays its execution by another 500ms
@@ -125,12 +123,13 @@ export default defineComponent({
       this.promptChannelName = null;
       this.promptChannelId = null;
     },
-    async fetchChannels(pageSize, afterCursor, beforeCursor) {
+    async fetchChannels(pageSize, afterCursor, beforeCursor, search) {
       this.$q.loading.show();
       await this.$store.dispatch("ytChannels/fetchChannels", {
         pageSize,
         afterCursor,
         beforeCursor,
+        search,
       });
       this.$q.loading.hide();
     },
@@ -140,6 +139,7 @@ export default defineComponent({
         await this.$store.dispatch("ytChannels/fetchCursorsToPage", {
           targetPage: pageNumber,
           first: this.pageSize,
+          search: this.searchText,
         });
       }
 
@@ -149,12 +149,14 @@ export default defineComponent({
         first: this.pageSize,
         afterCursor: cursor,
         beforeCursor: null,
+        search: this.searchText,
       };
 
       await this.fetchChannels(
         variables.first,
         variables.afterCursor,
-        variables.beforeCursor
+        variables.beforeCursor,
+        variables.search
       );
 
       await this.$store.commit("ytChannels/setCurrentPage", {
@@ -169,7 +171,7 @@ export default defineComponent({
       this.searchText = newText;
       // the change the page as it would trigger nextPage function before the text being set
       this.pageNumber = 1;
-      this.fetchChannels(this.pageNumber, this.pageSize, this.searchText);
+      this.fetchChannels(this.pageSize, null, null, this.searchText);
     },
   },
 });

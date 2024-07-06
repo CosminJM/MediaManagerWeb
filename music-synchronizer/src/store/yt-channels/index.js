@@ -1,4 +1,3 @@
-import { api } from "../../boot/axios";
 import { Notify } from "quasar";
 import gql from "graphql-tag";
 import { apolloClient } from "boot/apollo";
@@ -119,6 +118,7 @@ export default {
             first: payload.pageSize,
             after: payload.afterCursor,
             before: payload.beforeCursor,
+            search: payload.search,
           },
         });
         if (response.data.paginatedChannels.error != null) {
@@ -152,8 +152,12 @@ export default {
 
       while (currentPage < payload.targetPage) {
         const query = gql`
-          query PaginatedChannels($first: Int!, $after: String) {
-            paginatedChannels(first: $first, after: $after) {
+          query PaginatedChannels(
+            $first: Int!
+            $after: String
+            $search: String
+          ) {
+            paginatedChannels(first: $first, after: $after, search: $search) {
               pageInfo {
                 endCursor
                 startCursor
