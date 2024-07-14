@@ -2,7 +2,7 @@
   "name": "music-synchronizer",
   "version": "0.0.1",
   "description": "Manages music folders to be synchronized",
-  "productName": "MusicSynchronizer",
+  "productName": "Media Manager",
   "author": "Jacob Cosmin <cosmyn977@gmail.com>",
   "private": true,
   "scripts": {
