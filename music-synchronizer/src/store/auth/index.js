@@ -1,5 +1,6 @@
 import { api } from "../../boot/axios";
 import { Notify } from "quasar";
+import { apolloClient } from "boot/apollo";
 
 const notifySuccess = (message = "Operation successful!") => {
   Notify.create({
@@ -110,12 +111,15 @@ export default {
         throw error;
       }
     },
-    logout(context) {
+    async logout(context) {
       // clearTimeout(timer);
       //we must clear all store data about user, token, etc.
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
+
+      // Invalidate Apollo Client cache, so that when switching accounts graphql queries start fresh
+      await apolloClient.clearStore();
 
       context.commit("setUser", {
         token: null,
