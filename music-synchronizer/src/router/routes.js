@@ -13,7 +13,7 @@ const routes = [
   },
   {
     path: "/login",
-    component: () => import("pages/Auth/LoginPage.vue"),
+    component: () => import("pages/auth/LoginPage.vue"),
     meta: { requiresAuth: false },
   },
 
