@@ -48,9 +48,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: ./music-synchronizer
 
       - name: Build Quasar app
         run: npm run build
+        working-directory: ./music-synchronizer
         
       - name: Build And Deploy
         id: builddeploy
