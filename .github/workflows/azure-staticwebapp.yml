@@ -52,11 +52,11 @@ jobs:
         working-directory: ./music-synchronizer
 
       - name: Build Quasar app
-        run: npm run build
+        run: quasar build
         working-directory: ./music-synchronizer
 
       - name: List dist directory
-        run: ls -la music-synchronizer/dist
+        run: ls -la dist
         
       - name: Build And Deploy
         id: builddeploy
