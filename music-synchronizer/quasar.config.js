@@ -58,7 +58,7 @@ module.exports = configure(function (/* ctx */) {
       // ignorePublicFolder: true,
       // minify: false,
       // polyfillModulePreload: true,
-      distDir: "dist/spa",
+      distDir: "music-synchronizer/dist/spa",
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
