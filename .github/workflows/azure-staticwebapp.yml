@@ -54,6 +54,9 @@ jobs:
       - name: Build Quasar app
         run: npm run build
         working-directory: ./music-synchronizer
+
+      - name: List dist directory
+        run: ls -la music-synchronizer/dist
         
       - name: Build And Deploy
         id: builddeploy
