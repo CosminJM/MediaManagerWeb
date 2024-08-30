@@ -37,6 +37,7 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    environment: secrets # Associate the job with the 'secrets' environment
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
