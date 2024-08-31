@@ -6,7 +6,9 @@ import store from "../store/index.js";
 const api = axios.create({
   // !!! FOR DOCKER. I must use the port 9020 (current configuration) exposed by FRONTEND container to my localhost
   // because the browser talks from my machine to docker.
-  baseURL: "http://localhost:9020/api", // Your API base URL
+  // baseURL: "http://localhost:9020/api", // Your API base URL
+  baseURL:
+    "https://media-api1-csawd3aygmayeuap.westeurope-01.azurewebsites.net/api", // Your API base URL
   // withCredentials: true, // Ensure cookies are sent with requests
 });
 

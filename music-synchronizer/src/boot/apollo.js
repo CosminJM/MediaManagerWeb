@@ -12,7 +12,8 @@ function createApolloClient(router, store) {
   const httpLink = new HttpLink({
     // !!! FOR DOCKER. I must use the port 9020 (current configuration) exposed by FRONTEND container to my localhost
     // because the browser talks from my machine to docker.
-    uri: "http://localhost:9020/graphql",
+    // uri: "http://localhost:9020/graphql",
+    uri: "https://media-api1-csawd3aygmayeuap.westeurope-01.azurewebsites.net/graphql",
   });
 
   // Middleware to add the Bearer token to the request headers
