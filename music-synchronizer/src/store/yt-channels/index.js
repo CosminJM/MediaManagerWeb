@@ -125,8 +125,6 @@ export default {
           notifyFailure();
           return;
         }
-        console.log(response.data.paginatedChannels);
-        console.log("page cursors", context.state.pageCursors);
         const channels = response.data.paginatedChannels.edges.map(
           (edge) => edge.node
         );

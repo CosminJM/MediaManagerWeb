@@ -49,7 +49,6 @@ export default {
           password: payload.password,
         });
 
-        console.log(response.data);
         context.commit("setUser", {
           token: response.data.token,
           userId: response.data.id,
